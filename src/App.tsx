@@ -1,13 +1,60 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ChecklistForm from './components/ChecklistForm'
 import ChecklistHeader from './components/ChecklistHeader'
 import ChecklistItem from './components/ChecklistItem'
 import EmptyChecklist from './components/EmptyChecklist'
 
+const STORAGE_KEY = 'travel-checklist'
+
+type StoredChecklist = {
+  items: string[]
+  completedItems: number[]
+}
+
+const emptyChecklist: StoredChecklist = {
+  items: [],
+  completedItems: [],
+}
+
+function loadChecklist(): StoredChecklist {
+  try {
+    const storedChecklist = localStorage.getItem(STORAGE_KEY)
+    if (!storedChecklist) return emptyChecklist
+
+    const parsedChecklist = JSON.parse(storedChecklist) as Partial<StoredChecklist>
+    const items = Array.isArray(parsedChecklist.items)
+      ? parsedChecklist.items.filter((item) => typeof item === 'string')
+      : []
+    const completedItems = Array.isArray(parsedChecklist.completedItems)
+      ? parsedChecklist.completedItems.filter(
+          (index) =>
+            Number.isInteger(index) && index >= 0 && index < items.length,
+        )
+      : []
+
+    return {
+      items,
+      completedItems: [...new Set(completedItems)],
+    }
+  } catch {
+    return emptyChecklist
+  }
+}
+
 function App() {
+  const [storedChecklist] = useState(loadChecklist)
   const [item, setItem] = useState('')
-  const [items, setItems] = useState<string[]>([])
-  const [completedItems, setCompletedItems] = useState<number[]>([])
+  const [items, setItems] = useState<string[]>(storedChecklist.items)
+  const [completedItems, setCompletedItems] = useState<number[]>(
+    storedChecklist.completedItems,
+  )
+
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ items, completedItems }),
+    )
+  }, [items, completedItems])
 
   const addItem = () => {
     if (!item.trim()) return
