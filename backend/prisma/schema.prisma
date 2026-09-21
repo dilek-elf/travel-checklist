@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Trip {
+  id          Int             @id @default(autoincrement())
+  name        String
+  destination String
+  createdAt   DateTime        @default(now())
+  items       ChecklistItem[]
+}
+
+model ChecklistItem {
+  id        Int      @id @default(autoincrement())
+  text      String
+  isPacked  Boolean  @default(false)
+  tripId    Int
+  createdAt DateTime @default(now())
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
+}

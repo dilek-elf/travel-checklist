@@ -1,84 +1,94 @@
 import { useEffect, useState } from 'react'
+import {
+  createItem,
+  createTrip,
+  deleteItem,
+  getItems,
+  getTrips,
+  updateItem,
+  type ChecklistItemData,
+} from './api/checklistApi'
 import ChecklistForm from './components/ChecklistForm'
 import ChecklistHeader from './components/ChecklistHeader'
 import ChecklistItem from './components/ChecklistItem'
 import EmptyChecklist from './components/EmptyChecklist'
 
-const STORAGE_KEY = 'travel-checklist'
+async function loadChecklist() {
+  const trips = await getTrips()
+  const trip = trips[0] ?? (await createTrip())
+  const items = await getItems(trip.id)
 
-type StoredChecklist = {
-  items: string[]
-  completedItems: number[]
-}
-
-const emptyChecklist: StoredChecklist = {
-  items: [],
-  completedItems: [],
-}
-
-function loadChecklist(): StoredChecklist {
-  try {
-    const storedChecklist = localStorage.getItem(STORAGE_KEY)
-    if (!storedChecklist) return emptyChecklist
-
-    const parsedChecklist = JSON.parse(storedChecklist) as Partial<StoredChecklist>
-    const items = Array.isArray(parsedChecklist.items)
-      ? parsedChecklist.items.filter((item) => typeof item === 'string')
-      : []
-    const completedItems = Array.isArray(parsedChecklist.completedItems)
-      ? parsedChecklist.completedItems.filter(
-          (index) =>
-            Number.isInteger(index) && index >= 0 && index < items.length,
-        )
-      : []
-
-    return {
-      items,
-      completedItems: [...new Set(completedItems)],
-    }
-  } catch {
-    return emptyChecklist
-  }
+  return { tripId: trip.id, items }
 }
 
 function App() {
-  const [storedChecklist] = useState(loadChecklist)
   const [item, setItem] = useState('')
-  const [items, setItems] = useState<string[]>(storedChecklist.items)
-  const [completedItems, setCompletedItems] = useState<number[]>(
-    storedChecklist.completedItems,
-  )
+  const [tripId, setTripId] = useState<number | null>(null)
+  const [items, setItems] = useState<ChecklistItemData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ items, completedItems }),
-    )
-  }, [items, completedItems])
+    let isCurrent = true
 
-  const addItem = () => {
-    if (!item.trim()) return
+    loadChecklist()
+      .then((checklist) => {
+        if (!isCurrent) return
 
-    setItems((items) => [...items, item])
-    setItem('')
+        setTripId(checklist.tripId)
+        setItems(checklist.items)
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setError('Could not load your checklist. Is the backend running?')
+        }
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoading(false)
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [])
+
+  const addItem = async () => {
+    const text = item.trim()
+    if (!text || tripId === null) return
+
+    try {
+      setError('')
+      const newItem = await createItem(tripId, text)
+      setItems((items) => [...items, newItem])
+      setItem('')
+    } catch {
+      setError('Could not add the item. Please try again.')
+    }
   }
 
-  const toggleItem = (index: number, checked: boolean) => {
-    setCompletedItems((completedItems) =>
-      checked
-        ? [...completedItems, index]
-        : completedItems.filter((itemIndex) => itemIndex !== index),
-    )
+  const toggleItem = async (id: number, checked: boolean) => {
+    try {
+      setError('')
+      const updatedItem = await updateItem(id, checked)
+      setItems((items) =>
+        items.map((item) => (item.id === id ? updatedItem : item)),
+      )
+    } catch {
+      setError('Could not update the item. Please try again.')
+    }
   }
 
-  const deleteItem = (index: number) => {
-    setItems((items) => items.filter((_, itemIndex) => itemIndex !== index))
-    setCompletedItems((completedItems) =>
-      completedItems
-        .filter((itemIndex) => itemIndex !== index)
-        .map((itemIndex) => (itemIndex > index ? itemIndex - 1 : itemIndex)),
-    )
+  const removeItem = async (id: number) => {
+    try {
+      setError('')
+      await deleteItem(id)
+      setItems((items) => items.filter((item) => item.id !== id))
+    } catch {
+      setError('Could not delete the item. Please try again.')
+    }
   }
+
+  const completedItems = items.filter((item) => item.isPacked).length
 
   return (
     <main className="min-h-screen w-full overflow-x-hidden px-3 py-6 text-[#3f2b20] min-[380px]:px-4 min-[380px]:py-8 sm:px-6 sm:py-16">
@@ -102,21 +112,31 @@ function App() {
               Your essentials
             </h2>
             <span className="shrink-0 rounded-full bg-[#efe1d5] px-3 py-1 text-xs font-semibold whitespace-nowrap text-[#76513e]">
-              {completedItems.length} of {items.length} packed
+              {completedItems} of {items.length} packed
             </span>
           </div>
 
-          {items.length === 0 ? (
+          {error && (
+            <p className="mb-4 text-sm text-[#8a3f32]" role="alert">
+              {error}
+            </p>
+          )}
+
+          {isLoading ? (
+            <p className="py-6 text-center text-sm text-[#9b8171]">
+              Loading your checklist...
+            </p>
+          ) : items.length === 0 ? (
             <EmptyChecklist />
           ) : (
             <ul className="space-y-3">
-              {items.map((item, index) => (
+              {items.map((item) => (
                 <ChecklistItem
-                  key={`${item}-${index}`}
-                  item={item}
-                  completed={completedItems.includes(index)}
-                  onToggle={(checked) => toggleItem(index, checked)}
-                  onDelete={() => deleteItem(index)}
+                  key={item.id}
+                  item={item.text}
+                  completed={item.isPacked}
+                  onToggle={(checked) => toggleItem(item.id, checked)}
+                  onDelete={() => removeItem(item.id)}
                 />
               ))}
             </ul>

@@ -1,0 +1,193 @@
+{
+  "info": {
+    "name": "Travel Checklist API",
+    "description": "Beginner-friendly requests for testing the Travel Checklist Express API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "tripId",
+      "value": ""
+    },
+    {
+      "key": "itemId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Check API health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('API is running', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Create a trip",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Summer Holiday\",\n  \"destination\": \"Spain\"\n}"
+        },
+        "url": "{{baseUrl}}/api/trips"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Trip was created', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const trip = pm.response.json();",
+              "pm.collectionVariables.set('tripId', trip.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Get all trips",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/trips"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Trips were loaded', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Add Passport",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Passport\"\n}"
+        },
+        "url": "{{baseUrl}}/api/trips/{{tripId}}/items"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Item was created', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const item = pm.response.json();",
+              "pm.collectionVariables.set('itemId', item.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Get trip items",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/trips/{{tripId}}/items"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Items were loaded', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Mark Passport as packed",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isPacked\": true\n}"
+        },
+        "url": "{{baseUrl}}/api/items/{{itemId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Item was marked as packed', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().isPacked).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Delete Passport",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/items/{{itemId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Item was deleted', function () {",
+              "  pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
