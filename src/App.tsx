@@ -7,22 +7,26 @@ import {
   getTrips,
   updateItem,
   type ChecklistItemData,
+  type Trip,
 } from './api/checklistApi'
 import ChecklistForm from './components/ChecklistForm'
 import ChecklistHeader from './components/ChecklistHeader'
 import ChecklistItem from './components/ChecklistItem'
 import EmptyChecklist from './components/EmptyChecklist'
+import TripManager from './components/TripManager'
 
 async function loadChecklist() {
-  const trips = await getTrips()
-  const trip = trips[0] ?? (await createTrip())
+  let trips = await getTrips()
+  const trip = trips[0] ?? (await createTrip('My Trip', 'Next adventure'))
+  if (trips.length === 0) trips = [trip]
   const items = await getItems(trip.id)
 
-  return { tripId: trip.id, items }
+  return { trips, tripId: trip.id, items }
 }
 
 function App() {
   const [item, setItem] = useState('')
+  const [trips, setTrips] = useState<Trip[]>([])
   const [tripId, setTripId] = useState<number | null>(null)
   const [items, setItems] = useState<ChecklistItemData[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -35,6 +39,7 @@ function App() {
       .then((checklist) => {
         if (!isCurrent) return
 
+        setTrips(checklist.trips)
         setTripId(checklist.tripId)
         setItems(checklist.items)
       })
@@ -51,6 +56,34 @@ function App() {
       isCurrent = false
     }
   }, [])
+
+  const selectTrip = async (selectedTripId: number) => {
+    try {
+      setError('')
+      setIsLoading(true)
+      const selectedItems = await getItems(selectedTripId)
+      setTripId(selectedTripId)
+      setItems(selectedItems)
+    } catch {
+      setError('Could not load this trip. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const addTrip = async (name: string, destination: string) => {
+    try {
+      setError('')
+      const newTrip = await createTrip(name, destination)
+      setTrips((trips) => [newTrip, ...trips])
+      setTripId(newTrip.id)
+      setItems([])
+      return true
+    } catch {
+      setError('Could not create the trip. Please try again.')
+      return false
+    }
+  }
 
   const addItem = async () => {
     const text = item.trim()
@@ -94,6 +127,14 @@ function App() {
     <main className="min-h-screen w-full overflow-x-hidden px-3 py-6 text-[#3f2b20] min-[380px]:px-4 min-[380px]:py-8 sm:px-6 sm:py-16">
       <div className="mx-auto min-w-0 max-w-2xl">
         <ChecklistHeader />
+
+        <TripManager
+          trips={trips}
+          selectedTripId={tripId}
+          disabled={isLoading}
+          onSelect={selectTrip}
+          onCreate={addTrip}
+        />
 
         <section
           className="min-w-0 rounded-3xl border border-[#e4d2c3] bg-[#fffaf5]/95 p-4 shadow-[0_18px_45px_rgba(88,57,40,0.1)] min-[380px]:p-5 sm:rounded-[2rem] sm:p-8 sm:shadow-[0_24px_60px_rgba(88,57,40,0.12)]"

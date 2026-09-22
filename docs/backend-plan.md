@@ -61,6 +61,7 @@ All backend addresses begin with `/api`.
 
 | Method | Address | Purpose | Successful status |
 | --- | --- | --- | --- |
+| `GET` | `/api/health` | Check whether the API is running | `200 OK` |
 | `GET` | `/api/trips` | Get all trips | `200 OK` |
 | `POST` | `/api/trips` | Create a new trip | `201 Created` |
 | `GET` | `/api/trips/:tripId/items` | Get all items for one trip | `200 OK` |
@@ -164,6 +165,12 @@ Example validation error:
 
 ```json
 {
-  "message": "The item text is required."
+  "message": "Validation failed.",
+  "errors": [
+    {
+      "field": "text",
+      "message": "The item text is required."
+    }
+  ]
 }
 ```

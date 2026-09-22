@@ -37,13 +37,10 @@ export function getTrips() {
   return apiRequest<Trip[]>('/trips')
 }
 
-export function createTrip() {
+export function createTrip(name: string, destination: string) {
   return apiRequest<Trip>('/trips', {
     method: 'POST',
-    body: JSON.stringify({
-      name: 'My Trip',
-      destination: 'Next adventure',
-    }),
+    body: JSON.stringify({ name, destination }),
   })
 }
 
