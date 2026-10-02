@@ -3,6 +3,7 @@ import express from 'express'
 import { rateLimit } from 'express-rate-limit'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
+import authRouter from './routes/authRoutes.js'
 import itemRouter from './routes/itemRoutes.js'
 import tripRouter from './routes/tripRoutes.js'
 
@@ -39,6 +40,7 @@ app.get('/api/health', (_request, response) => {
   response.json({ message: 'Travel Checklist API is running' })
 })
 
+app.use('/api/auth', authRouter)
 app.use('/api/trips', tripRouter)
 app.use('/api/items', itemRouter)
 

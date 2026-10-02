@@ -14,6 +14,7 @@ items. The data is stored in a PostgreSQL database.
 - Keep data after refreshing the page
 - Responsive coffee-toned interface for mobile and desktop
 - Input validation and helpful API error responses
+- Register users with securely hashed passwords
 
 ## Tools Used
 
@@ -28,6 +29,7 @@ items. The data is stored in a PostgreSQL database.
 | PostgreSQL | Stores trips and checklist items |
 | Prisma | Connects the backend to PostgreSQL |
 | Zod | Validates information sent to the API |
+| bcryptjs | Hashes passwords before they are stored |
 | Postman | Tests the API routes |
 
 ## How the Application Works
@@ -152,6 +154,7 @@ All backend routes begin with `http://localhost:3000/api`.
 | Method | Route | Purpose |
 | --- | --- | --- |
 | `GET` | `/health` | Check whether the API is running |
+| `POST` | `/auth/register` | Create a user account |
 | `GET` | `/trips` | Get all trips |
 | `POST` | `/trips` | Create a trip |
 | `GET` | `/trips/:tripId/items` | Get one trip's checklist |
@@ -186,20 +189,22 @@ Follow the instructions in
 
 ## Database Structure
 
-One trip can have many checklist items. Each checklist item belongs to one trip.
+One user can have many trips. One trip can have many checklist items.
 
 ```text
-Trip
+User
 ├── id
-├── name
-├── destination
-└── createdAt
+├── email
+├── passwordHash
+└── Trip
+    ├── id
+    ├── name
+    ├── destination
     └── ChecklistItem
         ├── id
         ├── text
         ├── isPacked
-        ├── tripId
-        └── createdAt
+        └── tripId
 ```
 
 ## Project Structure
@@ -228,5 +233,6 @@ The following flows have been tested successfully:
 - Adding, packing, refreshing, and deleting items
 - Saving data in PostgreSQL
 - API validation and not-found responses
+- User registration, duplicate-email handling, and password hashing
 - Mobile layouts at 320px and 390px widths
 - Frontend lint and production build

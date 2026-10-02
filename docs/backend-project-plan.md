@@ -37,7 +37,7 @@ The intended users are travellers who want to:
 - Packed and unpacked item filtering
 - Request validation
 - Deliberate CORS configuration
-- Rate limiting and security headers
+- Rate limiting
 - Consistent JSON errors
 - Automated API tests
 - Postman collection
@@ -67,11 +67,10 @@ the beginner project unnecessarily large.
 | PostgreSQL | Persistent database | Users, trips, and items have clear relational connections |
 | Prisma | Database access and migrations | It provides a readable schema and safer parameterized queries |
 | Zod | Request validation | It validates and trims untrusted request data before controllers use it |
-| bcrypt | Password hashing | Passwords must never be stored as plain text |
+| bcryptjs | Password hashing | It is taught in the course and passwords must never be stored as plain text |
 | JSON Web Token | Authentication | A bearer token can protect API routes without a server-side session store |
-| Helmet | Security headers | It adds common HTTP security headers to Express responses |
 | express-rate-limit | Abuse protection | It limits repeated requests, especially login attempts |
-| Vitest and Supertest | Automated API testing | They can test ESM Express routes without manually opening a browser |
+| Jest and Supertest | Automated API testing | They are taught in the course and can test Express routes automatically |
 | Postman | Manual API testing | It makes endpoints and example requests easy to demonstrate |
 
 PostgreSQL will be the only project database. MongoDB is not required because
@@ -158,14 +157,14 @@ items. This prevents checklist items from remaining without a parent trip.
 1. The user sends an email and password.
 2. Zod validates the request.
 3. The email is normalized to lowercase.
-4. bcrypt hashes the password.
+4. bcryptjs hashes the password.
 5. Only the password hash is stored.
 
 ### Login
 
 1. The user sends an email and password.
 2. The API finds the user by email.
-3. bcrypt compares the password with the stored hash.
+3. bcryptjs compares the password with the stored hash.
 4. The API returns a short-lived JWT when the credentials are correct.
 
 ### Protected routes
@@ -242,11 +241,9 @@ The item list supports an optional `isPacked=true` or `isPacked=false` filter.
 
 ```json
 {
-  "data": {
-    "id": 1,
-    "email": "traveller@example.com",
-    "createdAt": "2026-10-01T10:00:00.000Z"
-  }
+  "id": 1,
+  "email": "traveller@example.com",
+  "createdAt": "2026-10-01T10:00:00.000Z"
 }
 ```
 
@@ -332,7 +329,7 @@ The password and password hash are never included in responses.
 - Validate all request bodies, parameters, and query strings with Zod.
 - Trim strings and normalize email addresses.
 - Use Prisma parameterized queries instead of building SQL strings.
-- Hash passwords with bcrypt before storing them.
+- Hash passwords with bcryptjs before storing them.
 - Keep JWT secrets, database URLs, and allowed origins in environment variables.
 - Apply authentication middleware to all trip and item routes.
 - Check ownership in every protected controller.
@@ -341,7 +338,6 @@ The password and password hash are never included in responses.
 - Apply a general rate limit to the API.
 - Limit JSON request-body size.
 - Disable the Express `x-powered-by` header.
-- Add Helmet security headers.
 - Return generic server errors without stack traces or secrets.
 - Use HTTPS in production through the hosting provider.
 
