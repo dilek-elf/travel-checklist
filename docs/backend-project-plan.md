@@ -183,9 +183,8 @@ their own `userId`. Item access is checked through the item's parent trip. The
 API should return `404 Not Found` for resources the user does not own so that it
 does not reveal whether another user's private resource exists.
 
-Registration, login token creation, JWT verification middleware, and protected
-trip ownership are implemented. Standalone item update and delete ownership are
-the next authorization stage.
+Registration, login token creation, JWT verification middleware, and ownership
+checks for trips and checklist items are implemented.
 
 ## Planned endpoints
 
@@ -257,12 +256,10 @@ The password and password hash are never included in responses.
 
 ```json
 {
-  "data": {
-    "token": "<jwt-token>",
-    "user": {
-      "id": 1,
-      "email": "traveller@example.com"
-    }
+  "token": "<jwt-token>",
+  "user": {
+    "id": 1,
+    "email": "traveller@example.com"
   }
 }
 ```
@@ -338,8 +335,7 @@ The password and password hash are never included in responses.
 - Apply authentication middleware to all trip and item routes.
 - Check ownership in every protected controller.
 - Configure CORS with an explicit client origin.
-- Apply stricter rate limits to registration and login.
-- Apply a general rate limit to the API.
+- Apply a general rate limit to the API, including registration and login.
 - Limit JSON request-body size.
 - Disable the Express `x-powered-by` header.
 - Return generic server errors without stack traces or secrets.
@@ -374,8 +370,8 @@ automated test suite required by the assignment.
 
 The final system will use:
 
-- a hosted Node.js service for the Express API;
-- a managed PostgreSQL database;
+- Render as the hosted Node.js service for the Express API;
+- Neon as the managed PostgreSQL database;
 - environment variables configured on the hosting service;
 - a provider-generated HTTPS URL.
 
@@ -383,9 +379,8 @@ The server will read `PORT` from the environment instead of using only a fixed
 local port. After deployment, the health, authentication, trip, and item routes
 will be tested against the live URL. The final URL will be added to the README.
 
-The hosting provider will be selected after the local API and automated tests
-are complete so deployment choices do not distract from the required backend
-work.
+The deployment steps are documented in
+[`deployment-guide.md`](deployment-guide.md).
 
 ## Implementation stages
 

@@ -28,3 +28,14 @@ export const itemIdSchema = z.object({
     .int('The item ID is invalid.')
     .positive('The item ID is invalid.'),
 })
+
+export const itemListQuerySchema = z
+  .object({
+    isPacked: z
+      .enum(['true', 'false'], {
+        error: 'isPacked must be true or false.',
+      })
+      .transform((value) => value === 'true')
+      .optional(),
+  })
+  .strict()

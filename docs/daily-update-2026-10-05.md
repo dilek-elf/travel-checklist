@@ -41,6 +41,14 @@
 10. Limited trip lists and nested checklist access to the trip owner.
 11. Tested missing tokens, invalid tokens, owned trips, and access from a second
     user.
+12. Completed read, update, and delete routes for trips.
+13. Protected checklist item changes with ownership checks.
+14. Added trip search and pagination and packed-status item filtering.
+15. Added safe malformed-JSON and large-request error responses.
+16. Added 10 automated Jest and Supertest integration tests using a separate
+    PostgreSQL test database.
+17. Updated the Postman collection for the complete authenticated CRUD flow.
+18. Prepared Render and Neon deployment configuration and documentation.
 
 ### Obstacles encountered and solutions
 
@@ -51,14 +59,18 @@
 - The trip routes previously did not know which user was making the request. I
   added authentication middleware that verifies the token and provides the user
   ID to the controllers.
+- Local automated tests initially could not connect while database access was
+  restricted. I verified PostgreSQL was running and repeated the tests with the
+  required local database permission.
 
 ### Biggest lesson learned
 
-- Password verification confirms who the user is, while the JWT gives the user
-  proof of that successful login. Middleware checks that proof before allowing
-  access to private routes.
+- A secure API needs authentication and authorization: the JWT identifies the
+  user, while ownership checks decide which trips and items that user may use.
+- Automated tests make it possible to repeat important success, validation,
+  and security checks without testing every request manually.
 
 ### Top priority for the next project day
 
-- Protect standalone checklist item update and delete routes with ownership
-  checks, then connect authentication to the frontend.
+- Deploy and verify the backend, then connect registration and login to the
+  React frontend on the next project day.

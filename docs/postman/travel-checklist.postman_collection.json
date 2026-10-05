@@ -369,7 +369,7 @@
       ]
     },
     {
-      "name": "3. Get all trips",
+      "name": "3. Search and paginate trips",
       "request": {
         "method": "GET",
         "header": [
@@ -378,16 +378,17 @@
             "value": "Bearer {{authToken}}"
           }
         ],
-        "url": "{{baseUrl}}/api/trips"
+        "url": "{{baseUrl}}/api/trips?search=Spain&page=1&limit=10"
       },
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Trips were loaded', function () {",
+              "pm.test('Paginated trips were loaded', function () {",
               "  pm.response.to.have.status(200);",
-              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "  pm.expect(pm.response.json().data).to.be.an('array');",
+              "  pm.expect(pm.response.json().pagination.page).to.eql(1);",
               "});"
             ]
           }
@@ -395,7 +396,67 @@
       ]
     },
     {
-      "name": "4. Add Passport",
+      "name": "4. Get one trip",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/trips/{{tripId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Owned trip was loaded', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('tripId')));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Update the trip",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Spain Holiday\"\n}"
+        },
+        "url": "{{baseUrl}}/api/trips/{{tripId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Trip was updated', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().name).to.eql('Spain Holiday');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Add Passport",
       "request": {
         "method": "POST",
         "header": [
@@ -430,7 +491,7 @@
       ]
     },
     {
-      "name": "5. Get trip items",
+      "name": "7. Get unpacked trip items",
       "request": {
         "method": "GET",
         "header": [
@@ -439,16 +500,17 @@
             "value": "Bearer {{authToken}}"
           }
         ],
-        "url": "{{baseUrl}}/api/trips/{{tripId}}/items"
+        "url": "{{baseUrl}}/api/trips/{{tripId}}/items?isPacked=false"
       },
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
-              "pm.test('Items were loaded', function () {",
+              "pm.test('Unpacked items were loaded', function () {",
               "  pm.response.to.have.status(200);",
               "  pm.expect(pm.response.json()).to.be.an('array');",
+              "  pm.expect(pm.response.json().every(function (item) { return item.isPacked === false; })).to.eql(true);",
               "});"
             ]
           }
@@ -456,13 +518,17 @@
       ]
     },
     {
-      "name": "6. Mark Passport as packed",
+      "name": "8. Mark Passport as packed",
       "request": {
         "method": "PATCH",
         "header": [
           {
             "key": "Content-Type",
             "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
           }
         ],
         "body": {
@@ -486,9 +552,42 @@
       ]
     },
     {
-      "name": "7. Delete Passport",
+      "name": "9. Get packed trip items",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/trips/{{tripId}}/items?isPacked=true"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Packed items were loaded', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "  pm.expect(pm.response.json().every(function (item) { return item.isPacked === true; })).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Delete Passport",
       "request": {
         "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
         "url": "{{baseUrl}}/api/items/{{itemId}}"
       },
       "event": [
@@ -497,6 +596,31 @@
           "script": {
             "exec": [
               "pm.test('Item was deleted', function () {",
+              "  pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Delete the trip",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/trips/{{tripId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Trip was deleted', function () {",
               "  pm.response.to.have.status(204);",
               "});"
             ]

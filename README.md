@@ -16,7 +16,12 @@ items. The data is stored in a PostgreSQL database.
 - Input validation and helpful API error responses
 - Register users with securely hashed passwords
 - Log in users and return a one-hour JSON Web Token
-- Protect trips so users can access only their own trip data
+- Protect trips and checklist items so users can access only their own data
+- Update and delete owned trips
+- Search trips and paginate trip results
+- Filter checklist items by packed or unpacked status
+- Limit requests and return safe, consistent JSON errors
+- Run automated backend integration tests against a separate test database
 
 ## Tools Used
 
@@ -33,6 +38,7 @@ items. The data is stored in a PostgreSQL database.
 | Zod | Validates information sent to the API |
 | bcryptjs | Hashes passwords before they are stored |
 | JSON Web Token | Authenticates users after a successful login |
+| Jest and Supertest | Automatically test important API behavior |
 | Postman | Tests the API routes |
 
 ## How the Application Works
@@ -162,13 +168,28 @@ All backend routes begin with `http://localhost:3000/api`.
 | `POST` | `/auth/login` | Log in and receive a JWT |
 | `GET` | `/trips` | Get the logged-in user's trips; JWT required |
 | `POST` | `/trips` | Create a trip for the logged-in user; JWT required |
+| `GET` | `/trips/:id` | Get one owned trip; JWT required |
+| `PATCH` | `/trips/:id` | Update one owned trip; JWT required |
+| `DELETE` | `/trips/:id` | Delete one owned trip; JWT required |
 | `GET` | `/trips/:tripId/items` | Get one owned trip's checklist; JWT required |
 | `POST` | `/trips/:tripId/items` | Add an item to an owned trip; JWT required |
-| `PATCH` | `/items/:id` | Update an item |
-| `DELETE` | `/items/:id` | Delete an item |
+| `PATCH` | `/items/:id` | Update an owned item; JWT required |
+| `DELETE` | `/items/:id` | Delete an owned item; JWT required |
 
 More API examples are available in
-[`docs/backend-plan.md`](docs/backend-plan.md).
+[`docs/backend-project-plan.md`](docs/backend-project-plan.md).
+
+The trip list accepts `search`, `page`, and `limit` query parameters:
+
+```text
+GET /api/trips?search=berlin&page=1&limit=10
+```
+
+The item list accepts an optional packed-status filter:
+
+```text
+GET /api/trips/1/items?isPacked=false
+```
 
 Protected requests use this header:
 
@@ -197,6 +218,21 @@ docs/postman/travel-checklist.postman_collection.json
 
 Follow the instructions in
 [`docs/postman/README.md`](docs/postman/README.md).
+
+### Run the automated backend tests
+
+Create a separate PostgreSQL database named `travel_checklist_test`. Copy
+`backend/.env.test.example` to `backend/.env.test`, update its database URL,
+then run these commands from the `backend` folder:
+
+```bash
+npx prisma migrate deploy
+npm test
+```
+
+The tests cover successful requests, validation errors, login, JWT protection,
+ownership, CRUD, search, pagination, and filtering. The test database is
+cleaned between tests and must never be the normal development database.
 
 ## Database Structure
 
@@ -227,6 +263,7 @@ travel-checklist/
 │   └── components/      Reusable interface components
 ├── backend/
 │   ├── prisma/          Database schema and migrations
+│   ├── tests/           Automated API integration tests
 │   └── src/
 │       ├── controllers/ Request logic
 │       ├── middleware/  Validation and error handling
@@ -245,5 +282,26 @@ The following flows have been tested successfully:
 - Saving data in PostgreSQL
 - API validation and not-found responses
 - User registration, duplicate-email handling, and password hashing
+- Login, JWT authentication, and user ownership authorization
+- Trip and checklist item CRUD operations
+- Trip search and pagination
+- Packed-status filtering
+- Automated API tests using a separate PostgreSQL test database
 - Mobile layouts at 320px and 390px widths
 - Frontend lint and production build
+
+## Project Documentation
+
+- [Backend project plan and ERD](docs/backend-project-plan.md)
+- [Postman testing guide](docs/postman/README.md)
+- [Render and Neon deployment guide](docs/deployment-guide.md)
+
+## Deployment
+
+The backend will be hosted on Render and will use a managed Neon PostgreSQL
+database. The live HTTPS URL will be added here after the deployment is
+verified.
+
+## Project Author
+
+Dilek — individual project

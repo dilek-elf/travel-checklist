@@ -1,4 +1,9 @@
-# Travel Checklist Backend Plan
+# Travel Checklist Initial Backend Plan
+
+This file records the first unauthenticated prototype plan. The current complete
+project plan, including users, authentication, authorization, security, tests,
+and deployment, is in
+[`backend-project-plan.md`](backend-project-plan.md).
 
 ## Database relationship
 

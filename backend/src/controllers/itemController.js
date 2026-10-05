@@ -2,6 +2,7 @@ import prisma from '../lib/prisma.js'
 
 export async function getItems(request, response) {
   const { tripId } = request.validated.params
+  const { isPacked } = request.validated.query
 
   const trip = await prisma.trip.findFirst({
     where: { id: tripId, userId: request.userId },
@@ -12,7 +13,10 @@ export async function getItems(request, response) {
   }
 
   const items = await prisma.checklistItem.findMany({
-    where: { tripId },
+    where: {
+      tripId,
+      ...(isPacked === undefined ? {} : { isPacked }),
+    },
     orderBy: { createdAt: 'asc' },
   })
 
@@ -42,8 +46,8 @@ export async function updateItem(request, response) {
   const { id } = request.validated.params
   const data = request.validated.body
 
-  const existingItem = await prisma.checklistItem.findUnique({
-    where: { id },
+  const existingItem = await prisma.checklistItem.findFirst({
+    where: { id, trip: { userId: request.userId } },
   })
 
   if (!existingItem) {
@@ -61,8 +65,8 @@ export async function updateItem(request, response) {
 export async function deleteItem(request, response) {
   const { id } = request.validated.params
 
-  const existingItem = await prisma.checklistItem.findUnique({
-    where: { id },
+  const existingItem = await prisma.checklistItem.findFirst({
+    where: { id, trip: { userId: request.userId } },
   })
 
   if (!existingItem) {

@@ -40,12 +40,16 @@ Unauthorized`. The numbered trip requests include `Bearer {{authToken}}`, so
 they use the JWT saved by the successful login request.
 
 Send the requests in their numbered order, starting with **1. Check API
-health**. The collection automatically remembers the created `tripId` and
-`itemId`, so you do not need to copy database IDs manually.
+health**. The collection automatically remembers the JWT, created `tripId`, and
+created `itemId`, so you do not need to copy them manually.
 
-Run the health, registration, login, protected-route, trip, and nested checklist
-requests in that order. Standalone item update and delete authorization will be
-completed in the next security step.
+The numbered requests test the complete flow: create, search, read, update, and
+delete a trip; add, filter, pack, and delete a checklist item; and send the JWT
+on every protected request.
+
+To test the deployed backend, change the `baseUrl` collection variable to the
+Render HTTPS URL without a final slash. No individual request URLs need to be
+edited.
 
 Every request includes a small test. After sending a request, open Postman's
 test results to see whether it passed.
