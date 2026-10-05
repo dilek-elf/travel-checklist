@@ -183,6 +183,9 @@ their own `userId`. Item access is checked through the item's parent trip. The
 API should return `404 Not Found` for resources the user does not own so that it
 does not reveal whether another user's private resource exists.
 
+Registration and login token creation are implemented. JWT verification
+middleware and protected trip ownership are the next authentication stage.
+
 ## Planned endpoints
 
 ### Public endpoints

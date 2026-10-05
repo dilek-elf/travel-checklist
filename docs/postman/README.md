@@ -30,13 +30,18 @@ requests in order:
 The first request creates a unique test email automatically. The last request
 reuses that email to confirm that duplicate accounts are rejected.
 
+Next, expand **Login tests** and send its four requests in order. These requests
+confirm successful login, an incorrect password, an unknown email, and invalid
+input. Successful login saves the returned JWT in the `authToken` collection
+variable for later protected-route testing.
+
 Send the requests in their numbered order, starting with **1. Check API
 health**. The collection automatically remembers the created `tripId` and
 `itemId`, so you do not need to copy database IDs manually.
 
-The trip and item requests will be updated when login and protected routes are
-implemented. During the authentication stage, use the health and registration
-requests.
+The trip and item requests will be updated when protected routes are
+implemented. During the current authentication stage, use the health,
+registration, and login requests.
 
 Every request includes a small test. After sending a request, open Postman's
 test results to see whether it passed.

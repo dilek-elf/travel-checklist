@@ -13,3 +13,17 @@ export const registerSchema = z
       .max(72, 'The password must contain 72 characters or fewer.'),
   })
   .strict()
+
+export const loginSchema = z
+  .object({
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .email('Enter a valid email address.'),
+    password: z
+      .string()
+      .min(1, 'The password is required.')
+      .max(72, 'The password must contain 72 characters or fewer.'),
+  })
+  .strict()

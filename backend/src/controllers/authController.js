@@ -1,5 +1,39 @@
 import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 import prisma from '../lib/prisma.js'
+
+const jwtSecret = process.env.JWT_SECRET
+
+if (!jwtSecret) {
+  throw new Error('JWT_SECRET is required.')
+}
+
+export async function login(request, response) {
+  const { email, password } = request.validated.body
+
+  const user = await prisma.user.findUnique({ where: { email } })
+  const passwordMatches = user
+    ? bcrypt.compareSync(password, user.passwordHash)
+    : false
+
+  if (!user || !passwordMatches) {
+    return response.status(401).json({
+      message: 'Email or password is incorrect.',
+    })
+  }
+
+  const token = jwt.sign({ userId: user.id }, jwtSecret, {
+    expiresIn: '1h',
+  })
+
+  return response.json({
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+    },
+  })
+}
 
 export async function register(request, response) {
   const { email, password } = request.validated.body

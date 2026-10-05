@@ -1,10 +1,16 @@
 import { Router } from 'express'
-import { register } from '../controllers/authController.js'
+import { login, register } from '../controllers/authController.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { validate } from '../middleware/validate.js'
-import { registerSchema } from '../schemas/authSchemas.js'
+import { loginSchema, registerSchema } from '../schemas/authSchemas.js'
 
 const authRouter = Router()
+
+authRouter.post(
+  '/login',
+  validate(loginSchema, 'body'),
+  asyncHandler(login),
+)
 
 authRouter.post(
   '/register',

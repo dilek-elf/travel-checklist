@@ -15,6 +15,7 @@ items. The data is stored in a PostgreSQL database.
 - Responsive coffee-toned interface for mobile and desktop
 - Input validation and helpful API error responses
 - Register users with securely hashed passwords
+- Log in users and return a one-hour JSON Web Token
 
 ## Tools Used
 
@@ -30,6 +31,7 @@ items. The data is stored in a PostgreSQL database.
 | Prisma | Connects the backend to PostgreSQL |
 | Zod | Validates information sent to the API |
 | bcryptjs | Hashes passwords before they are stored |
+| JSON Web Token | Authenticates users after a successful login |
 | Postman | Tests the API routes |
 
 ## How the Application Works
@@ -107,6 +109,7 @@ Update `YOUR_USERNAME` with your PostgreSQL username:
 DATABASE_URL="postgresql://YOUR_USERNAME@localhost:5432/travel_checklist?schema=public"
 CLIENT_ORIGIN="http://localhost:5173"
 RATE_LIMIT_MAX="100"
+JWT_SECRET="replace-with-a-long-random-secret"
 ```
 
 The `.env` file is private and must not be pushed to GitHub.
@@ -155,6 +158,7 @@ All backend routes begin with `http://localhost:3000/api`.
 | --- | --- | --- |
 | `GET` | `/health` | Check whether the API is running |
 | `POST` | `/auth/register` | Create a user account |
+| `POST` | `/auth/login` | Log in and receive a JWT |
 | `GET` | `/trips` | Get all trips |
 | `POST` | `/trips` | Create a trip |
 | `GET` | `/trips/:tripId/items` | Get one trip's checklist |
