@@ -310,6 +310,30 @@
       ]
     },
     {
+      "name": "Protected route tests",
+      "item": [
+        {
+          "name": "Reject a trip request without a JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Missing JWT was rejected', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/trips"
+          }
+        }
+      ]
+    },
+    {
       "name": "2. Create a trip",
       "request": {
         "method": "POST",
@@ -317,6 +341,10 @@
           {
             "key": "Content-Type",
             "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
           }
         ],
         "body": {
@@ -344,6 +372,12 @@
       "name": "3. Get all trips",
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
         "url": "{{baseUrl}}/api/trips"
       },
       "event": [
@@ -368,6 +402,10 @@
           {
             "key": "Content-Type",
             "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
           }
         ],
         "body": {
@@ -395,6 +433,12 @@
       "name": "5. Get trip items",
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
         "url": "{{baseUrl}}/api/trips/{{tripId}}/items"
       },
       "event": [

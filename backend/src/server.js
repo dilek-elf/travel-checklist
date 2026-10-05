@@ -2,6 +2,7 @@ import cors from 'cors'
 import express from 'express'
 import { rateLimit } from 'express-rate-limit'
 import { errorHandler } from './middleware/errorHandler.js'
+import { authenticate } from './middleware/authenticate.js'
 import { notFound } from './middleware/notFound.js'
 import authRouter from './routes/authRoutes.js'
 import itemRouter from './routes/itemRoutes.js'
@@ -30,7 +31,7 @@ app.use(
   cors({
     origin: clientOrigin,
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 )
 app.use('/api', apiLimiter)
@@ -41,7 +42,7 @@ app.get('/api/health', (_request, response) => {
 })
 
 app.use('/api/auth', authRouter)
-app.use('/api/trips', tripRouter)
+app.use('/api/trips', authenticate, tripRouter)
 app.use('/api/items', itemRouter)
 
 app.use(notFound)

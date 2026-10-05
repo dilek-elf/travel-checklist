@@ -36,6 +36,11 @@
    placeholder to the example configuration.
 6. Added successful and unsuccessful login cases to the Postman collection.
 7. Updated the README, backend plan, and testing instructions.
+8. Added JWT authentication middleware for protected routes.
+9. Protected the trip routes and connected new trips to the logged-in user.
+10. Limited trip lists and nested checklist access to the trip owner.
+11. Tested missing tokens, invalid tokens, owned trips, and access from a second
+    user.
 
 ### Obstacles encountered and solutions
 
@@ -43,12 +48,17 @@
   work into two small steps and verified password comparison first.
 - The JWT secret must not be stored in GitHub. I generated it only in the local
   `.env` file and documented a placeholder in `.env.example`.
+- The trip routes previously did not know which user was making the request. I
+  added authentication middleware that verifies the token and provides the user
+  ID to the controllers.
 
 ### Biggest lesson learned
 
 - Password verification confirms who the user is, while the JWT gives the user
-  proof of that successful login for later protected requests.
+  proof of that successful login. Middleware checks that proof before allowing
+  access to private routes.
 
 ### Top priority for the next project day
 
-- Create JWT authentication middleware and use it to protect the trip routes.
+- Protect standalone checklist item update and delete routes with ownership
+  checks, then connect authentication to the frontend.

@@ -3,7 +3,9 @@ import prisma from '../lib/prisma.js'
 export async function getItems(request, response) {
   const { tripId } = request.validated.params
 
-  const trip = await prisma.trip.findUnique({ where: { id: tripId } })
+  const trip = await prisma.trip.findFirst({
+    where: { id: tripId, userId: request.userId },
+  })
 
   if (!trip) {
     return response.status(404).json({ message: 'Trip not found.' })
@@ -21,7 +23,9 @@ export async function createItem(request, response) {
   const { tripId } = request.validated.params
   const { text } = request.validated.body
 
-  const trip = await prisma.trip.findUnique({ where: { id: tripId } })
+  const trip = await prisma.trip.findFirst({
+    where: { id: tripId, userId: request.userId },
+  })
 
   if (!trip) {
     return response.status(404).json({ message: 'Trip not found.' })

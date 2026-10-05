@@ -16,6 +16,7 @@ items. The data is stored in a PostgreSQL database.
 - Input validation and helpful API error responses
 - Register users with securely hashed passwords
 - Log in users and return a one-hour JSON Web Token
+- Protect trips so users can access only their own trip data
 
 ## Tools Used
 
@@ -159,15 +160,21 @@ All backend routes begin with `http://localhost:3000/api`.
 | `GET` | `/health` | Check whether the API is running |
 | `POST` | `/auth/register` | Create a user account |
 | `POST` | `/auth/login` | Log in and receive a JWT |
-| `GET` | `/trips` | Get all trips |
-| `POST` | `/trips` | Create a trip |
-| `GET` | `/trips/:tripId/items` | Get one trip's checklist |
-| `POST` | `/trips/:tripId/items` | Add an item to a trip |
+| `GET` | `/trips` | Get the logged-in user's trips; JWT required |
+| `POST` | `/trips` | Create a trip for the logged-in user; JWT required |
+| `GET` | `/trips/:tripId/items` | Get one owned trip's checklist; JWT required |
+| `POST` | `/trips/:tripId/items` | Add an item to an owned trip; JWT required |
 | `PATCH` | `/items/:id` | Update an item |
 | `DELETE` | `/items/:id` | Delete an item |
 
 More API examples are available in
 [`docs/backend-plan.md`](docs/backend-plan.md).
+
+Protected requests use this header:
+
+```text
+Authorization: Bearer <token-from-login>
+```
 
 ## Testing
 
