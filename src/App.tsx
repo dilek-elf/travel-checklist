@@ -5,10 +5,15 @@ import {
   deleteItem,
   getItems,
   getTrips,
+  hasStoredToken,
+  login,
+  logout,
+  register,
   updateItem,
   type ChecklistItemData,
   type Trip,
 } from './api/checklistApi'
+import AuthForm from './components/AuthForm'
 import ChecklistForm from './components/ChecklistForm'
 import ChecklistHeader from './components/ChecklistHeader'
 import ChecklistItem from './components/ChecklistItem'
@@ -25,14 +30,17 @@ async function loadChecklist() {
 }
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(hasStoredToken)
   const [item, setItem] = useState('')
   const [trips, setTrips] = useState<Trip[]>([])
   const [tripId, setTripId] = useState<number | null>(null)
   const [items, setItems] = useState<ChecklistItemData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(isAuthenticated)
   const [error, setError] = useState('')
 
   useEffect(() => {
+    if (!isAuthenticated) return
+
     let isCurrent = true
 
     loadChecklist()
@@ -55,7 +63,37 @@ function App() {
     return () => {
       isCurrent = false
     }
-  }, [])
+  }, [isAuthenticated])
+
+  const authenticate = async (
+    action: (email: string, password: string) => Promise<unknown>,
+    email: string,
+    password: string,
+  ) => {
+    try {
+      setError('')
+      await action(email, password)
+      setIsLoading(true)
+      setIsAuthenticated(true)
+      return true
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : 'Could not access the account.',
+      )
+      return false
+    }
+  }
+
+  const logOut = () => {
+    logout()
+    setIsAuthenticated(false)
+    setTrips([])
+    setTripId(null)
+    setItems([])
+    setItem('')
+    setIsLoading(false)
+    setError('')
+  }
 
   const selectTrip = async (selectedTripId: number) => {
     try {
@@ -128,15 +166,37 @@ function App() {
       <div className="mx-auto min-w-0 max-w-2xl">
         <ChecklistHeader />
 
-        <TripManager
+        {!isAuthenticated ? (
+          <AuthForm
+            error={error}
+            onLogin={(email, password) =>
+              authenticate(login, email, password)
+            }
+            onRegister={(email, password) =>
+              authenticate(register, email, password)
+            }
+          />
+        ) : (
+          <>
+            <div className="mb-4 flex justify-end">
+              <button
+                className="rounded-xl border border-[#b98f76] px-4 py-2 text-sm font-semibold text-[#6f4935] transition hover:bg-[#f3e4d8]"
+                type="button"
+                onClick={logOut}
+              >
+                Log out
+              </button>
+            </div>
+
+            <TripManager
           trips={trips}
           selectedTripId={tripId}
           disabled={isLoading}
           onSelect={selectTrip}
           onCreate={addTrip}
-        />
+            />
 
-        <section
+            <section
           className="min-w-0 rounded-3xl border border-[#e4d2c3] bg-[#fffaf5]/95 p-4 shadow-[0_18px_45px_rgba(88,57,40,0.1)] min-[380px]:p-5 sm:rounded-[2rem] sm:p-8 sm:shadow-[0_24px_60px_rgba(88,57,40,0.12)]"
           aria-label="Travel checklist"
         >
@@ -182,7 +242,9 @@ function App() {
               ))}
             </ul>
           )}
-        </section>
+            </section>
+          </>
+        )}
 
         <p className="mt-6 text-center text-xs tracking-wide text-[#9b8171]">
           Take only what you need. Leave room for memories.
