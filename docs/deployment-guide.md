@@ -1,9 +1,10 @@
 # Backend Deployment Guide
 
-The Travel Checklist backend uses two hosted services:
+The Travel Checklist application uses three hosted services:
 
 - **Neon** hosts the PostgreSQL database.
 - **Render** runs the Node.js and Express API.
+- **Netlify** hosts the React and Vite frontend.
 
 This keeps the database and API separate, as described in the course deployment
 material. MongoDB is not needed because PostgreSQL already stores all related
@@ -50,7 +51,7 @@ migrations to the hosted database.
 | Variable | Value |
 | --- | --- |
 | `DATABASE_URL` | The private Neon connection string |
-| `CLIENT_ORIGIN` | `http://localhost:5173` until the frontend is deployed |
+| `CLIENT_ORIGIN` | `https://dilek-travel-checklist.netlify.app` |
 
 Render generates `JWT_SECRET` automatically from `render.yaml`. The general
 request limit is set to 100 requests per 15 minutes.
@@ -68,7 +69,7 @@ The deployment configuration tells Render to:
 Open this address after Render finishes deploying:
 
 ```text
-https://YOUR-RENDER-URL/api/health
+https://travel-checklist-api.onrender.com/api/health
 ```
 
 The expected response is:
@@ -84,21 +85,35 @@ In Postman, change the collection variable `baseUrl` from
 collection in order to test registration, login, protected trips, and checklist
 items against the live HTTPS API.
 
-## 4. After the frontend is deployed
+## 4. Deploy the frontend
 
-Change `CLIENT_ORIGIN` in Render to the frontend's public HTTPS address. This
-allows the browser frontend to call the API while keeping CORS limited to the
-intended client.
+1. Connect the GitHub repository to Netlify.
+2. Use `npm run build` as the build command.
+3. Use `dist` as the publish directory.
+4. Add this Netlify environment variable:
+
+```text
+VITE_API_URL=https://travel-checklist-api.onrender.com/api
+```
+
+5. Set `CLIENT_ORIGIN` in Render to the Netlify HTTPS address.
+
+The deployed frontend is available at:
+
+```text
+https://dilek-travel-checklist.netlify.app
+```
 
 ## Deployment checklist
 
-- [ ] Automated backend tests pass.
-- [ ] Frontend lint and build pass.
-- [ ] `.env` and `.env.test` are not tracked by Git.
-- [ ] Neon connection string is stored only as a Render environment variable.
-- [ ] The Render deployment succeeds.
-- [ ] The HTTPS health endpoint returns `200 OK`.
-- [ ] Registration and login work on the live API.
-- [ ] Protected requests reject missing tokens.
-- [ ] Trip and checklist CRUD work on the live API.
-- [ ] The final backend URL is added to the README.
+- [x] Automated backend tests pass.
+- [x] Frontend lint and build pass.
+- [x] `.env` and `.env.test` are not tracked by Git.
+- [x] Neon connection string is stored only as a Render environment variable.
+- [x] The Render deployment succeeds.
+- [x] The Netlify deployment succeeds.
+- [x] The HTTPS health endpoint returns `200 OK`.
+- [x] Registration and login work on the live API.
+- [x] Protected requests reject missing tokens.
+- [x] Trip and checklist CRUD work on the live API.
+- [x] The frontend and backend URLs are added to the README.

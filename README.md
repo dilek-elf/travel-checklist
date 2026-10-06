@@ -42,6 +42,7 @@ items. The data is stored in a PostgreSQL database.
 | Postman | Tests the API routes |
 | Neon | Hosts the deployed PostgreSQL database |
 | Render | Hosts the deployed Express backend |
+| Netlify | Hosts the deployed React frontend |
 
 ## How the Application Works
 
@@ -57,8 +58,8 @@ Express API
 PostgreSQL database
 ```
 
-The frontend runs at `http://localhost:5173` and sends requests to the backend
-at `http://localhost:3000/api`.
+During local development, the frontend runs at `http://localhost:5173` and
+sends requests to the backend at `http://localhost:3000/api`.
 
 ## Requirements
 
@@ -302,11 +303,17 @@ The following flows have been tested successfully:
 
 ## Deployment
 
-The backend is deployed on Render and uses a managed Neon PostgreSQL database.
+The frontend is deployed on Netlify. The backend is deployed on Render and uses
+a managed Neon PostgreSQL database.
 
+- Live application: <https://dilek-travel-checklist.netlify.app>
 - Live backend: <https://travel-checklist-api.onrender.com>
 - Health check: <https://travel-checklist-api.onrender.com/api/health>
 - API base URL: `https://travel-checklist-api.onrender.com/api`
+
+Netlify builds the React application with `npm run build`, publishes the
+`dist` folder, and provides the live API URL through the `VITE_API_URL`
+environment variable.
 
 Render is configured with the `backend` root directory and these commands:
 
@@ -320,7 +327,8 @@ JWT secret, allowed frontend origin, and rate-limit setting. These secret
 values are configured in Render and are not stored in GitHub.
 
 The live API was verified with registration, login, trip CRUD, checklist item
-CRUD, trip search, and packed-item filtering. Render also checks
+CRUD, trip search, and packed-item filtering. The Netlify application was also
+verified with login, protected trip loading, and logout. Render checks
 `/api/health` to confirm that the service is available.
 
 ## Project Author
