@@ -33,12 +33,12 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 )
-app.use('/api', apiLimiter)
-app.use(express.json({ limit: '10kb' }))
-
 app.get('/api/health', (_request, response) => {
   response.json({ message: 'Travel Checklist API is running' })
 })
+
+app.use('/api', apiLimiter)
+app.use(express.json({ limit: '10kb' }))
 
 app.use('/api/auth', authRouter)
 app.use('/api/trips', authenticate, tripRouter)

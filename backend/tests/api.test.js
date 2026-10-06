@@ -41,6 +41,7 @@ describe('public API routes', () => {
 
     expect(response.status).toBe(200)
     expect(response.body.message).toBe('Travel Checklist API is running')
+    expect(response.headers.ratelimit).toBeUndefined()
   })
 
   test('registers a user and stores only a password hash', async () => {
