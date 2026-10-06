@@ -40,6 +40,8 @@ items. The data is stored in a PostgreSQL database.
 | JSON Web Token | Authenticates users after a successful login |
 | Jest and Supertest | Automatically test important API behavior |
 | Postman | Tests the API routes |
+| Neon | Hosts the deployed PostgreSQL database |
+| Render | Hosts the deployed Express backend |
 
 ## How the Application Works
 
@@ -287,6 +289,8 @@ The following flows have been tested successfully:
 - Trip search and pagination
 - Packed-status filtering
 - Automated API tests using a separate PostgreSQL test database
+- Live deployment with Neon PostgreSQL and Render
+- Live login, trip CRUD, checklist CRUD, search, and filtering
 - Mobile layouts at 320px and 390px widths
 - Frontend lint and production build
 
@@ -298,9 +302,26 @@ The following flows have been tested successfully:
 
 ## Deployment
 
-The backend will be hosted on Render and will use a managed Neon PostgreSQL
-database. The live HTTPS URL will be added here after the deployment is
-verified.
+The backend is deployed on Render and uses a managed Neon PostgreSQL database.
+
+- Live backend: <https://travel-checklist-api.onrender.com>
+- Health check: <https://travel-checklist-api.onrender.com/api/health>
+- API base URL: `https://travel-checklist-api.onrender.com/api`
+
+Render is configured with the `backend` root directory and these commands:
+
+```text
+Build: npm install && npx prisma generate && npx prisma migrate deploy
+Start: npm start
+```
+
+The deployed service uses private environment variables for the database URL,
+JWT secret, allowed frontend origin, and rate-limit setting. These secret
+values are configured in Render and are not stored in GitHub.
+
+The live API was verified with registration, login, trip CRUD, checklist item
+CRUD, trip search, and packed-item filtering. Render also checks
+`/api/health` to confirm that the service is available.
 
 ## Project Author
 
