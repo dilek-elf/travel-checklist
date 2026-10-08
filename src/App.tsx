@@ -18,6 +18,7 @@ import ChecklistForm from './components/ChecklistForm'
 import ChecklistHeader from './components/ChecklistHeader'
 import ChecklistItem from './components/ChecklistItem'
 import EmptyChecklist from './components/EmptyChecklist'
+import ProgressCard from './components/ProgressCard'
 import TripManager from './components/TripManager'
 
 async function loadChecklist() {
@@ -162,93 +163,89 @@ function App() {
   const completedItems = items.filter((item) => item.isPacked).length
 
   return (
-    <main className="min-h-screen w-full overflow-x-hidden px-3 py-6 text-[#3f2b20] min-[380px]:px-4 min-[380px]:py-8 sm:px-6 sm:py-16">
-      <div className="mx-auto min-w-0 max-w-2xl">
-        <ChecklistHeader />
+    <main className="app-shell" id="top">
+      <div className="page-wrap">
+        <nav className="site-nav" aria-label="Main navigation">
+          <a className="brand" href="#top" aria-label="Travel Checklist home">
+            <span className="brand-mark">✦</span>
+            <span>Travel Checklist</span>
+          </a>
+          <span className="nav-motto">Pack lightly. Travel fully.</span>
+          {isAuthenticated && (
+            <button className="logout-button" type="button" onClick={logOut}>
+              Log out
+            </button>
+          )}
+        </nav>
+
+        <ChecklistHeader compact={isAuthenticated} />
 
         {!isAuthenticated ? (
-          <AuthForm
-            error={error}
-            onLogin={(email, password) =>
-              authenticate(login, email, password)
-            }
-            onRegister={(email, password) =>
-              authenticate(register, email, password)
-            }
-          />
-        ) : (
-          <>
-            <div className="mb-4 flex justify-end">
-              <button
-                className="rounded-xl border border-[#b98f76] px-4 py-2 text-sm font-semibold text-[#6f4935] transition hover:bg-[#f3e4d8]"
-                type="button"
-                onClick={logOut}
-              >
-                Log out
-              </button>
-            </div>
-
-            <TripManager
-          trips={trips}
-          selectedTripId={tripId}
-          disabled={isLoading}
-          onSelect={selectTrip}
-          onCreate={addTrip}
+          <div className="auth-wrap">
+            <AuthForm
+              error={error}
+              onLogin={(email, password) =>
+                authenticate(login, email, password)
+              }
+              onRegister={(email, password) =>
+                authenticate(register, email, password)
+              }
             />
-
-            <section
-          className="min-w-0 rounded-3xl border border-[#e4d2c3] bg-[#fffaf5]/95 p-4 shadow-[0_18px_45px_rgba(88,57,40,0.1)] min-[380px]:p-5 sm:rounded-[2rem] sm:p-8 sm:shadow-[0_24px_60px_rgba(88,57,40,0.12)]"
-          aria-label="Travel checklist"
-        >
-          <ChecklistForm
-            item={item}
-            onItemChange={setItem}
-            onAdd={addItem}
-          />
-
-          <div className="my-6 h-px bg-[#eadbd0]" />
-
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-serif text-lg font-semibold text-[#493126] min-[380px]:text-xl">
-              Your essentials
-            </h2>
-            <span className="shrink-0 rounded-full bg-[#efe1d5] px-3 py-1 text-xs font-semibold whitespace-nowrap text-[#76513e]">
-              {completedItems} of {items.length} packed
-            </span>
           </div>
+        ) : (
+          <div className="workspace-grid">
+            <section className="clay-card checklist-card" aria-label="Travel checklist">
+              <TripManager
+                trips={trips}
+                selectedTripId={tripId}
+                disabled={isLoading}
+                onSelect={selectTrip}
+                onCreate={addTrip}
+              />
 
-          {error && (
-            <p className="mb-4 text-sm text-[#8a3f32]" role="alert">
-              {error}
-            </p>
-          )}
+              <div className="section-divider" />
 
-          {isLoading ? (
-            <p className="py-6 text-center text-sm text-[#9b8171]">
-              Loading your checklist...
-            </p>
-          ) : items.length === 0 ? (
-            <EmptyChecklist />
-          ) : (
-            <ul className="space-y-3">
-              {items.map((item) => (
-                <ChecklistItem
-                  key={item.id}
-                  item={item.text}
-                  completed={item.isPacked}
-                  onToggle={(checked) => toggleItem(item.id, checked)}
-                  onDelete={() => removeItem(item.id)}
-                />
-              ))}
-            </ul>
-          )}
+              <div className="list-heading">
+                <div>
+                  <p className="eyebrow">The essentials</p>
+                  <h2>What do you need to pack?</h2>
+                </div>
+                <span>{items.length} items</span>
+              </div>
+
+              <ChecklistForm item={item} onItemChange={setItem} onAdd={addItem} />
+
+              {error && <p className="error-message" role="alert">{error}</p>}
+
+              <div className="list-area">
+                {isLoading ? (
+                  <p className="loading-message">Preparing your suitcase...</p>
+                ) : items.length === 0 ? (
+                  <EmptyChecklist />
+                ) : (
+                  <ul className="checklist-list">
+                    {items.map((item) => (
+                      <ChecklistItem
+                        key={item.id}
+                        item={item.text}
+                        completed={item.isPacked}
+                        onToggle={(checked) => toggleItem(item.id, checked)}
+                        onDelete={() => removeItem(item.id)}
+                      />
+                    ))}
+                  </ul>
+                )}
+              </div>
             </section>
-          </>
+
+            <ProgressCard completed={completedItems} total={items.length} />
+          </div>
         )}
 
-        <p className="mt-6 text-center text-xs tracking-wide text-[#9b8171]">
-          Take only what you need. Leave room for memories.
-        </p>
+        <footer>
+          <span>Plan it. Pack it. Go.</span>
+          <span>Take only what you need. Leave room for memories.</span>
+        </footer>
       </div>
     </main>
   )
