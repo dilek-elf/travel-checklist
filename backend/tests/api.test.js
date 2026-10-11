@@ -188,7 +188,29 @@ describe('protected trip routes', () => {
     const ownerUpdate = await request(app)
       .patch(`/api/trips/${tripId}`)
       .set('Authorization', authorization(owner.token))
-      .send({ destination: 'Portugal' })
+      .send({
+        destination: 'Portugal',
+        tripType: 'Family vacation',
+        season: 'Summer',
+        durationDays: 14,
+        travelGroup: 'Family',
+        hasPet: true,
+        petType: 'Dog',
+        transport: 'Car',
+        startDate: '2026-12-01',
+        endDate: '2026-12-14',
+        travelScope: 'International',
+        accommodation: 'Holiday apartment',
+        adultCount: 2,
+        babyCount: 1,
+        toddlerCount: 0,
+        childCount: 1,
+        teenCount: 0,
+        activities: ['Beach/swimming', 'Photography'],
+        luggage: 'Checked suitcase',
+        hasLaundry: true,
+        personalNeeds: ['Medication', 'Glasses/contact lenses'],
+      })
     const otherDelete = await request(app)
       .delete(`/api/trips/${tripId}`)
       .set('Authorization', authorization(otherUser.token))
@@ -200,6 +222,26 @@ describe('protected trip routes', () => {
     expect(otherRead.status).toBe(404)
     expect(ownerUpdate.status).toBe(200)
     expect(ownerUpdate.body.destination).toBe('Portugal')
+    expect(ownerUpdate.body).toMatchObject({
+      tripType: 'Family vacation',
+      season: 'Summer',
+      durationDays: 14,
+      travelGroup: 'Family',
+      hasPet: true,
+      petType: 'Dog',
+      transport: 'Car',
+      startDate: '2026-12-01T00:00:00.000Z',
+      endDate: '2026-12-14T00:00:00.000Z',
+      travelScope: 'International',
+      accommodation: 'Holiday apartment',
+      adultCount: 2,
+      babyCount: 1,
+      childCount: 1,
+      activities: ['Beach/swimming', 'Photography'],
+      luggage: 'Checked suitcase',
+      hasLaundry: true,
+      personalNeeds: ['Medication', 'Glasses/contact lenses'],
+    })
     expect(otherDelete.status).toBe(404)
     expect(ownerDelete.status).toBe(204)
   })
@@ -219,7 +261,7 @@ describe('protected checklist item routes', () => {
     const passportResponse = await request(app)
       .post(`/api/trips/${tripId}/items`)
       .set('Authorization', authorization(owner.token))
-      .send({ text: 'Passport' })
+      .send({ text: 'Passport', category: 'Documents' })
     const passportId = passportResponse.body.id
 
     await request(app)
@@ -230,7 +272,7 @@ describe('protected checklist item routes', () => {
     const ownerUpdate = await request(app)
       .patch(`/api/items/${passportId}`)
       .set('Authorization', authorization(owner.token))
-      .send({ isPacked: true })
+      .send({ text: 'Passport and visa', isPacked: true })
     const packedItems = await request(app)
       .get(`/api/trips/${tripId}/items?isPacked=true`)
       .set('Authorization', authorization(owner.token))
@@ -251,7 +293,8 @@ describe('protected checklist item routes', () => {
     expect(ownerUpdate.status).toBe(200)
     expect(packedItems.status).toBe(200)
     expect(packedItems.body).toHaveLength(1)
-    expect(packedItems.body[0].text).toBe('Passport')
+    expect(packedItems.body[0].text).toBe('Passport and visa')
+    expect(packedItems.body[0].category).toBe('Documents')
     expect(unpackedItems.body).toHaveLength(1)
     expect(unpackedItems.body[0].text).toBe('Sunglasses')
     expect(otherUpdate.status).toBe(404)

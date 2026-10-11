@@ -1,15 +1,21 @@
 # Travel Checklist
 
 A responsive full-stack application for organising packing lists for different
-trips. Users can create and select trips, then add, pack, and delete checklist
-items. The data is stored in a PostgreSQL database.
+trips. Users can create and select trips, then add, edit, categorise, pack, and
+delete checklist items. The data is stored in a PostgreSQL database.
 
 ## Features
 
 - Create trips with a name and destination
 - Select a trip and view its own checklist
+- Save trip type, season, duration, travel group, pet, and transport details
+- Generate a personalised packing list from those trip details
+- Prevent the generator from adding the same suggestion twice
 - Add travel essentials to the selected trip
+- Edit checklist item text
+- Organise items into packing categories
 - Mark items as packed or unpacked
+- Filter the React checklist by all, packed, or not packed items
 - Delete checklist items
 - Keep data after refreshing the page
 - Responsive coffee-toned interface for mobile and desktop
@@ -179,6 +185,15 @@ All backend routes begin with `http://localhost:3000/api`.
 | `PATCH` | `/items/:id` | Update an owned item; JWT required |
 | `DELETE` | `/items/:id` | Delete an owned item; JWT required |
 
+For example, a new checklist item can include a category:
+
+```json
+{
+  "text": "Passport",
+  "category": "Documents"
+}
+```
+
 More API examples are available in
 [`docs/backend-project-plan.md`](docs/backend-project-plan.md).
 
@@ -250,9 +265,25 @@ User
     ├── id
     ├── name
     ├── destination
+    ├── tripType
+    ├── season
+    ├── durationDays
+    ├── travelGroup
+    ├── hasPet
+    ├── petType
+    ├── transport
+    ├── startDate / endDate
+    ├── travelScope
+    ├── accommodation
+    ├── traveller counts
+    ├── activities
+    ├── luggage
+    ├── hasLaundry
+    ├── personalNeeds
     └── ChecklistItem
         ├── id
         ├── text
+        ├── category
         ├── isPacked
         └── tripId
 ```
@@ -293,6 +324,8 @@ The following flows have been tested successfully:
 - Live deployment with Neon PostgreSQL and Render
 - Live login, trip CRUD, checklist CRUD, search, and filtering
 - Mobile layouts at 320px and 390px widths
+- Personalised checklist generation from trip dates, party, transport,
+  accommodation, activities, luggage, pet details, and personal needs
 - Frontend lint and production build
 
 ## Project Documentation

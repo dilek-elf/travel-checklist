@@ -1,5 +1,17 @@
 import prisma from '../lib/prisma.js'
 
+function prepareTripData(data) {
+  return {
+    ...data,
+    ...(data.startDate !== undefined
+      ? { startDate: data.startDate ? new Date(`${data.startDate}T00:00:00.000Z`) : null }
+      : {}),
+    ...(data.endDate !== undefined
+      ? { endDate: data.endDate ? new Date(`${data.endDate}T00:00:00.000Z`) : null }
+      : {}),
+  }
+}
+
 export async function getTrips(request, response) {
   const { search, page, limit } = request.validated.query
   const where = {
@@ -36,10 +48,10 @@ export async function getTrips(request, response) {
 }
 
 export async function createTrip(request, response) {
-  const { name, destination } = request.validated.body
+  const data = request.validated.body
 
   const trip = await prisma.trip.create({
-    data: { name, destination, userId: request.userId },
+    data: { ...prepareTripData(data), userId: request.userId },
   })
 
   return response.status(201).json(trip)
@@ -61,7 +73,7 @@ export async function getTrip(request, response) {
 
 export async function updateTrip(request, response) {
   const { id } = request.validated.params
-  const data = request.validated.body
+  const data = prepareTripData(request.validated.body)
 
   const existingTrip = await prisma.trip.findFirst({
     where: { id, userId: request.userId },

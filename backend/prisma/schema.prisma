@@ -16,14 +16,34 @@ model User {
 }
 
 model Trip {
-  id          Int             @id @default(autoincrement())
-  name        String
-  destination String
-  userId      Int
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items       ChecklistItem[]
+  id            Int             @id @default(autoincrement())
+  name          String
+  destination   String
+  tripType      String          @default("Weekend")
+  season        String          @default("All seasons")
+  durationDays  Int             @default(3)
+  travelGroup   String          @default("Solo")
+  hasPet        Boolean         @default(false)
+  petType       String?
+  transport     String          @default("Plane")
+  startDate     DateTime?
+  endDate       DateTime?
+  travelScope   String          @default("Domestic")
+  accommodation String          @default("Hotel")
+  adultCount    Int             @default(1)
+  babyCount     Int             @default(0)
+  toddlerCount  Int             @default(0)
+  childCount    Int             @default(0)
+  teenCount     Int             @default(0)
+  activities    String[]        @default([])
+  luggage       String          @default("Carry-on")
+  hasLaundry    Boolean         @default(false)
+  personalNeeds String[]        @default([])
+  userId        Int
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items         ChecklistItem[]
 
   @@index([userId])
 }
@@ -31,6 +51,7 @@ model Trip {
 model ChecklistItem {
   id        Int      @id @default(autoincrement())
   text      String
+  category  String   @default("Other")
   isPacked  Boolean  @default(false)
   tripId    Int
   createdAt DateTime @default(now())

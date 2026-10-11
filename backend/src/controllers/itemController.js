@@ -25,7 +25,7 @@ export async function getItems(request, response) {
 
 export async function createItem(request, response) {
   const { tripId } = request.validated.params
-  const { text } = request.validated.body
+  const { text, category } = request.validated.body
 
   const trip = await prisma.trip.findFirst({
     where: { id: tripId, userId: request.userId },
@@ -36,7 +36,7 @@ export async function createItem(request, response) {
   }
 
   const item = await prisma.checklistItem.create({
-    data: { text, tripId },
+    data: { text, category, tripId },
   })
 
   return response.status(201).json(item)
