@@ -177,6 +177,24 @@ describe('public API routes', () => {
     expect(wrongCode.body.message).toBe(unknownEmail.body.message)
   })
 
+  test('lets a logged-in user create a replacement recovery code', async () => {
+    const registration = await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'traveller@example.com', password })
+    const session = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'traveller@example.com', password })
+
+    const response = await request(app)
+      .post('/api/auth/recovery-code')
+      .set('Authorization', authorization(session.body.token))
+    const missingToken = await request(app).post('/api/auth/recovery-code')
+
+    expect(response.status).toBe(200)
+    expect(response.body.recoveryCode).not.toBe(registration.body.recoveryCode)
+    expect(missingToken.status).toBe(401)
+  })
+
   test('returns a safe error for malformed JSON', async () => {
     const response = await request(app)
       .post('/api/auth/register')

@@ -203,6 +203,12 @@ export function resetPassword(
   })
 }
 
+export function createNewRecoveryCode() {
+  return apiRequest<{ recoveryCode: string }>('/auth/recovery-code', {
+    method: 'POST',
+  })
+}
+
 export async function login(email: string, password: string) {
   const session = await apiRequest<AuthSession>('/auth/login', {
     method: 'POST',

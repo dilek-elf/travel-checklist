@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   createItem,
+  createNewRecoveryCode,
   createTrip,
   deleteItem,
   getItems,
@@ -127,6 +128,23 @@ function App() {
     }
   }
 
+  const showNewRecoveryCode = async () => {
+    try {
+      setError('')
+      setIsLoading(true)
+      const result = await createNewRecoveryCode()
+      setRecoveryCode(result.recoveryCode)
+    } catch (codeError) {
+      setError(
+        codeError instanceof Error
+          ? codeError.message
+          : 'Could not create a new recovery code.',
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const logOut = () => {
     logout()
     setIsAuthenticated(false)
@@ -134,6 +152,7 @@ function App() {
     setTripId(null)
     setItems([])
     setItem('')
+    setRecoveryCode('')
     setIsLoading(false)
     setError('')
   }
@@ -301,9 +320,14 @@ function App() {
           </a>
           <span className="nav-motto">Pack lightly. Travel fully.</span>
           {isAuthenticated && (
-            <button className="logout-button" type="button" onClick={logOut}>
-              Log out
-            </button>
+            <div className="nav-account-actions">
+              <button className="recovery-nav-button" type="button" disabled={isLoading} onClick={() => void showNewRecoveryCode()}>
+                New recovery code
+              </button>
+              <button className="logout-button" type="button" onClick={logOut}>
+                Log out
+              </button>
+            </div>
           )}
         </nav>
 

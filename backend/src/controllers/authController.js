@@ -114,3 +114,13 @@ export async function resetPassword(request, response) {
     recoveryCode: newRecoveryCode,
   })
 }
+
+export async function regenerateRecoveryCode(request, response) {
+  const recoveryCode = createRecoveryCode()
+  await prisma.user.update({
+    where: { id: request.userId },
+    data: { recoveryCodeHash: bcrypt.hashSync(recoveryCode, 10) },
+  })
+
+  return response.json({ recoveryCode })
+}
