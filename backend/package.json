@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --env-file=.env --watch src/server.js",
     "start": "node src/server.js",
+    "reset-password": "node --env-file=.env scripts/reset-password.js",
     "test": "node --experimental-vm-modules --env-file=.env.test ./node_modules/jest/bin/jest.js --runInBand"
   },
   "engines": {
