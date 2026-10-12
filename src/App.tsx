@@ -9,12 +9,14 @@ import {
   login,
   logout,
   register,
+  resetPassword,
   updateItem,
   updateTrip,
   type ChecklistItemData,
   type ItemCategory,
   type Trip,
   type TripPreferences,
+  type AuthSession,
 } from './api/checklistApi'
 import AuthForm from './components/AuthForm'
 import ChecklistForm from './components/ChecklistForm'
@@ -47,6 +49,7 @@ function App() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [showCustomItem, setShowCustomItem] = useState(false)
   const [error, setError] = useState('')
+  const [recoveryCode, setRecoveryCode] = useState('')
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -85,19 +88,40 @@ function App() {
   }, [isAuthenticated])
 
   const authenticate = async (
-    action: (email: string, password: string) => Promise<unknown>,
+    action: (email: string, password: string) => Promise<AuthSession>,
     email: string,
     password: string,
   ) => {
     try {
       setError('')
-      await action(email, password)
+      const session = await action(email, password)
+      if (session.recoveryCode) setRecoveryCode(session.recoveryCode)
       setIsLoading(true)
       setIsAuthenticated(true)
       return true
     } catch (error) {
       setError(
         error instanceof Error ? error.message : 'Could not access the account.',
+      )
+      return false
+    }
+  }
+
+  const recoverAccount = async (
+    email: string,
+    code: string,
+    newPassword: string,
+  ) => {
+    try {
+      setError('')
+      const result = await resetPassword(email, code, newPassword)
+      setRecoveryCode(result.recoveryCode)
+      return true
+    } catch (resetError) {
+      setError(
+        resetError instanceof Error
+          ? resetError.message
+          : 'Could not reset the password.',
       )
       return false
     }
@@ -285,6 +309,17 @@ function App() {
 
         <ChecklistHeader compact={isAuthenticated} />
 
+        {recoveryCode && (
+          <section className="recovery-code-notice" aria-label="Recovery code">
+            <div>
+              <strong>Save your recovery code</strong>
+              <p>You need this code if you forget your password. It is shown only now.</p>
+            </div>
+            <code>{recoveryCode}</code>
+            <button type="button" onClick={() => setRecoveryCode('')}>I saved it</button>
+          </section>
+        )}
+
         {!isAuthenticated ? (
           <div className="auth-wrap">
             <AuthForm
@@ -295,6 +330,7 @@ function App() {
               onRegister={(email, password) =>
                 authenticate(register, email, password)
               }
+              onResetPassword={recoverAccount}
             />
           </div>
         ) : (

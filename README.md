@@ -175,6 +175,7 @@ All backend routes begin with `http://localhost:3000/api`.
 | `GET` | `/health` | Check whether the API is running |
 | `POST` | `/auth/register` | Create a user account |
 | `POST` | `/auth/login` | Log in and receive a JWT |
+| `POST` | `/auth/reset-password` | Reset a password with email and recovery code |
 | `GET` | `/trips` | Get the logged-in user's trips; JWT required |
 | `POST` | `/trips` | Create a trip for the logged-in user; JWT required |
 | `GET` | `/trips/:id` | Get one owned trip; JWT required |
@@ -214,6 +215,11 @@ Protected requests use this header:
 ```text
 Authorization: Bearer <token-from-login>
 ```
+
+Registration returns a recovery code that is shown once. The user must store
+it safely. Only a bcrypt hash of the code is stored in PostgreSQL. A successful
+password reset replaces both the password and the recovery code, so an old code
+cannot be reused. Existing accounts receive a code once, on their next login.
 
 ## Testing
 

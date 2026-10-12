@@ -52,6 +52,7 @@ describe('public API routes', () => {
 
     expect(response.status).toBe(201)
     expect(response.body.email).toBe('traveller@example.com')
+    expect(response.body.recoveryCode).toMatch(/^[A-F0-9]{4}(?:-[A-F0-9]{4}){3}$/)
     expect(response.body).not.toHaveProperty('password')
     expect(response.body).not.toHaveProperty('passwordHash')
 
@@ -61,6 +62,10 @@ describe('public API routes', () => {
 
     expect(savedUser.passwordHash).not.toBe(password)
     expect(bcrypt.compareSync(password, savedUser.passwordHash)).toBe(true)
+    expect(savedUser.recoveryCodeHash).not.toBe(response.body.recoveryCode)
+    expect(
+      bcrypt.compareSync(response.body.recoveryCode, savedUser.recoveryCodeHash),
+    ).toBe(true)
   })
 
   test('rejects invalid registration and duplicate email addresses', async () => {
@@ -115,6 +120,61 @@ describe('public API routes', () => {
     expect(incorrectPassword.body).not.toHaveProperty('token')
     expect(unknownEmail.status).toBe(401)
     expect(unknownEmail.body).not.toHaveProperty('token')
+  })
+
+  test('resets a password with a one-use recovery code and rotates the code', async () => {
+    const registration = await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'traveller@example.com', password })
+    const oldCode = registration.body.recoveryCode
+
+    const resetResponse = await request(app)
+      .post('/api/auth/reset-password')
+      .send({
+        email: 'traveller@example.com',
+        recoveryCode: oldCode.toLowerCase(),
+        newPassword: 'new-password-456',
+      })
+    const loginResponse = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'traveller@example.com', password: 'new-password-456' })
+    const reusedCode = await request(app)
+      .post('/api/auth/reset-password')
+      .send({
+        email: 'traveller@example.com',
+        recoveryCode: oldCode,
+        newPassword: 'another-password',
+      })
+
+    expect(resetResponse.status).toBe(200)
+    expect(resetResponse.body.recoveryCode).not.toBe(oldCode)
+    expect(loginResponse.status).toBe(200)
+    expect(reusedCode.status).toBe(400)
+  })
+
+  test('rejects an invalid recovery code without revealing account details', async () => {
+    await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'traveller@example.com', password })
+
+    const wrongCode = await request(app)
+      .post('/api/auth/reset-password')
+      .send({
+        email: 'traveller@example.com',
+        recoveryCode: 'AAAA-BBBB-CCCC-DDDD',
+        newPassword: 'new-password-456',
+      })
+    const unknownEmail = await request(app)
+      .post('/api/auth/reset-password')
+      .send({
+        email: 'unknown@example.com',
+        recoveryCode: 'AAAA-BBBB-CCCC-DDDD',
+        newPassword: 'new-password-456',
+      })
+
+    expect(wrongCode.status).toBe(400)
+    expect(unknownEmail.status).toBe(400)
+    expect(wrongCode.body.message).toBe(unknownEmail.body.message)
   })
 
   test('returns a safe error for malformed JSON', async () => {

@@ -8,11 +8,12 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-  trips        Trip[]
+  id               Int      @id @default(autoincrement())
+  email            String   @unique
+  passwordHash     String
+  recoveryCodeHash String?
+  createdAt        DateTime @default(now())
+  trips            Trip[]
 }
 
 model Trip {

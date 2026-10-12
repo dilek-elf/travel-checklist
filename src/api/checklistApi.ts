@@ -9,7 +9,11 @@ export type User = {
 export type AuthSession = {
   token: string
   user: User
+  recoveryCode?: string
 }
+
+type RegistrationResponse = User & { recoveryCode: string }
+type PasswordResetResponse = { message: string; recoveryCode: string }
 
 export type Trip = {
   id: number
@@ -179,12 +183,24 @@ async function apiRequest<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export async function register(email: string, password: string) {
-  await apiRequest<User>('/auth/register', {
+  const registration = await apiRequest<RegistrationResponse>('/auth/register', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   })
 
-  return login(email, password)
+  const session = await login(email, password)
+  return { ...session, recoveryCode: registration.recoveryCode }
+}
+
+export function resetPassword(
+  email: string,
+  recoveryCode: string,
+  newPassword: string,
+) {
+  return apiRequest<PasswordResetResponse>('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ email, recoveryCode, newPassword }),
+  })
 }
 
 export async function login(email: string, password: string) {
