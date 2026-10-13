@@ -7,6 +7,7 @@ const itemTextSchema = z
   .max(200, 'The item text must be 200 characters or fewer.')
 
 const itemCategorySchema = z.enum([
+  'Last minute',
   'Documents',
   'Clothes',
   'Toiletries',

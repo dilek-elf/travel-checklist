@@ -98,5 +98,50 @@ export function generatePackingList(preferences: TripPreferences) {
   }
   personalNeeds.forEach((need) => suggestions.push(...needItems[need]))
 
+  const lastMinuteItems: PackingSuggestion[] = [
+    item('Put phone, wallet and keys in your day bag', 'Last minute'),
+    item('Check the departure time and route', 'Last minute'),
+    item('Charge phone and power bank', 'Last minute'),
+    item('Download tickets, bookings and offline maps', 'Last minute'),
+    item('Check the weather one last time', 'Last minute'),
+    item('Empty the rubbish and remove food that may spoil', 'Last minute'),
+    item('Turn off unnecessary appliances', 'Last minute'),
+    item('Close windows and lock the door', 'Last minute'),
+  ]
+
+  if (travelScope === 'International') {
+    lastMinuteItems.push(
+      item('Check passport, visa and travel insurance are easy to reach', 'Last minute'),
+    )
+  } else {
+    lastMinuteItems.push(item('Put ID and travel documents in your day bag', 'Last minute'))
+  }
+
+  const transportChecks: Partial<Record<typeof transport, PackingSuggestion[]>> = {
+    Plane: [
+      item('Check in online and save the boarding pass', 'Last minute'),
+      item('Check terminal, gate and baggage limits', 'Last minute'),
+    ],
+    Train: [item('Check the platform and any service changes', 'Last minute')],
+    Bus: [item('Check the bus stop and boarding time', 'Last minute')],
+    Car: [item('Check fuel or charging level and tyre pressure', 'Last minute')],
+    Motorcycle: [item('Check fuel, tyres and protective gear', 'Last minute')],
+    'Camper van/RV': [item('Secure loose items and check fuel, water and power', 'Last minute')],
+    'Cruise ship': [item('Check port, boarding time and cruise documents', 'Last minute')],
+  }
+  lastMinuteItems.push(...(transportChecks[transport] ?? []))
+
+  if (personalNeeds.includes('Medication')) {
+    lastMinuteItems.push(item('Put medication in your hand luggage', 'Last minute'))
+  }
+  if (hasPet) {
+    lastMinuteItems.push(item('Give your pet food and water before departure', 'Last minute'))
+  }
+  if (babyCount || toddlerCount) {
+    lastMinuteItems.push(item('Pack the final nappies, snacks and comfort item', 'Last minute'))
+  }
+
+  suggestions.unshift(...lastMinuteItems)
+
   return Array.from(new Map(suggestions.map((suggestion) => [`${suggestion.category}:${suggestion.text.toLowerCase()}`, suggestion])).values())
 }

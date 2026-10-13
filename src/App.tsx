@@ -309,6 +309,11 @@ function App() {
     groups[category] = [...(groups[category] ?? []), currentItem]
     return groups
   }, {})
+  const groupedEntries = Object.entries(groupedItems).sort(([first], [second]) => {
+    if (first === 'Last minute') return -1
+    if (second === 'Last minute') return 1
+    return first.localeCompare(second)
+  })
 
   return (
     <main className="app-shell" id="top">
@@ -448,9 +453,12 @@ function App() {
                   </p>
                 ) : (
                   <div className="category-groups">
-                    {Object.entries(groupedItems).map(([categoryName, categoryItems]) => (
-                      <section className="category-group" key={categoryName}>
-                        <h3>{categoryName}</h3>
+                    {groupedEntries.map(([categoryName, categoryItems]) => (
+                      <section className={`category-group ${categoryName === 'Last minute' ? 'last-minute-group' : ''}`} key={categoryName}>
+                        <h3>{categoryName === 'Last minute' ? 'Before you leave' : categoryName}</h3>
+                        {categoryName === 'Last minute' && (
+                          <p className="category-note">A final check for the small things that are easy to forget.</p>
+                        )}
                         <ul className="checklist-list">
                           {categoryItems?.map((item) => (
                             <ChecklistItem

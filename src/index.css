@@ -101,6 +101,10 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 .item-category { color: #a1816f; font-size: .68rem; }
 .category-groups { display: grid; gap: 22px; }
 .category-group h3 { margin: 0 0 9px 4px; color: #886856; font-size: .73rem; letter-spacing: .12em; text-transform: uppercase; }
+.last-minute-group { padding: 17px; border: 1px solid #c9c7a6; border-radius: 22px; background: linear-gradient(145deg,rgba(242,239,210,.72),rgba(255,250,239,.7)); box-shadow: inset 1px 1px 1px rgba(255,255,255,.8); }
+.last-minute-group h3 { margin-bottom: 4px; color: #687356; }
+.category-note { margin: 0 0 13px 4px; color: #7c7962; font-size: .75rem; line-height: 1.45; }
+.last-minute-group .item-token { color: #fffdf4; background: linear-gradient(145deg,#a8ad81,#78825f); }
 .item-edit-form { display: flex; align-items: center; flex: 1; gap: 8px; min-width: 0; }
 .item-edit-form input { flex: 1; min-width: 90px; padding: 9px 11px; border: 1px solid #d3b49f; border-radius: 11px; color: #54392b; background: #fffaf5; font: inherit; outline: none; }
 .item-edit-form input:focus { border-color: #b66c4d; box-shadow: 0 0 0 3px rgba(182,108,77,.13); }

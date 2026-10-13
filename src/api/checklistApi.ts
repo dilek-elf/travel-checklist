@@ -145,6 +145,7 @@ export type ChecklistItemData = {
 }
 
 export const ITEM_CATEGORIES = [
+  'Last minute',
   'Documents',
   'Clothes',
   'Toiletries',

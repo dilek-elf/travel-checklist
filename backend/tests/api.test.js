@@ -347,6 +347,11 @@ describe('protected checklist item routes', () => {
       .set('Authorization', authorization(owner.token))
       .send({ text: 'Sunglasses' })
 
+    const lastMinuteResponse = await request(app)
+      .post(`/api/trips/${tripId}/items`)
+      .set('Authorization', authorization(owner.token))
+      .send({ text: 'Lock the door', category: 'Last minute' })
+
     const ownerUpdate = await request(app)
       .patch(`/api/items/${passportId}`)
       .set('Authorization', authorization(owner.token))
@@ -369,12 +374,16 @@ describe('protected checklist item routes', () => {
       .set('Authorization', authorization(owner.token))
 
     expect(ownerUpdate.status).toBe(200)
+    expect(lastMinuteResponse.status).toBe(201)
+    expect(lastMinuteResponse.body.category).toBe('Last minute')
     expect(packedItems.status).toBe(200)
     expect(packedItems.body).toHaveLength(1)
     expect(packedItems.body[0].text).toBe('Passport and visa')
     expect(packedItems.body[0].category).toBe('Documents')
-    expect(unpackedItems.body).toHaveLength(1)
-    expect(unpackedItems.body[0].text).toBe('Sunglasses')
+    expect(unpackedItems.body).toHaveLength(2)
+    expect(unpackedItems.body.map((item) => item.text)).toEqual(
+      expect.arrayContaining(['Sunglasses', 'Lock the door']),
+    )
     expect(otherUpdate.status).toBe(404)
     expect(otherDelete.status).toBe(404)
     expect(ownerDelete.status).toBe(204)
